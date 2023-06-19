@@ -1,0 +1,4 @@
+openai~=0.27.8
+slack_bolt~=1.18.0
+pyramid~=2.0
+urllib3==1.26.6
