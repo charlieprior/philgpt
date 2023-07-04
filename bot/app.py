@@ -98,7 +98,7 @@ def reply(
 
 def postMessage(channel, prompt):
     response = openai.Completion.create(
-        model="curie:ft-personal:phil-gpt-2023-06-15-04-19-27",
+        model="curie:ft-personal-2023-07-04-05-59-02",
         prompt=prompt,
         max_tokens=100,
         temperature=0.85,
@@ -107,9 +107,12 @@ def postMessage(channel, prompt):
         best_of=10,
         stop="\n",
         logit_bias={"25": -1.1,
-                    "2633": -1,
-                    "36251": -1,
-                    "14511": -1}  # Penalize emoji keywords and semicolons
+                    "2633": -0.5,
+                    "36251": -0.5,
+                    "14511": -0.5,
+                    "4386": -0.5,
+                    "18886": -0.1,
+                    "62": -1.1}  # Penalize emoji keywords and semicolons
     )
     output = response["choices"][0]["text"].strip()
     client.chat_postMessage(
