@@ -97,14 +97,33 @@ def reply(
 
 
 def postImage(channel, prompt):
-    response = openai.Image.create(
+    response = openai.Completion.create(
+        # model="curie:ft-personal-2023-07-04-05-59-02",
+        model="curie:ft-personal:phil-gpt-2023-06-15-04-19-27",
         prompt=prompt,
+        max_tokens=100,
+        temperature=0.85,
+        presence_penalty=-0.2,
+        frequency_penalty=0.8,
+        best_of=10,
+        stop="\n",
+        logit_bias={"25": -1.1,
+                    "2633": -0.5,
+                    "36251": -0.5,
+                    "14511": -0.5,
+                    "4386": -0.5,
+                    "18886": -0.1,
+                    "62": -1.1}  # Penalize emoji keywords and semicolons
+    )
+    output = response["choices"][0]["text"].strip()
+    response = openai.Image.create(
+        prompt=output,
         n=1,
         size="1024x1024"
     )
     image_url = response['data'][0]['url']
-    attachments = [{"title": "Cat", "image_url": image_url}]
-    client.chat_postMessage(channel=channel, text=prompt,
+    attachments = [{"title": "A drawing by PhilGPT", "image_url": image_url}]
+    client.chat_postMessage(channel=channel, text=output,
                             attachments=attachments)
 
 
@@ -166,7 +185,7 @@ def event_listener(
 
 def randomMessages():
     prompt = r"What are you up to Phil Barbeau?\nPhil Barbeau:"
-    waitTime = 120  # seconds
+    waitTime = random.randint(24 * 60 * 60, 3 * 24 * 60 * 60)  # Seconds
     while True:
         postTime = datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(seconds=waitTime, hours=-4)
         logging.info(f"Message will be posted at %s %s UTC-4" % (postTime.date(), postTime.time()))
