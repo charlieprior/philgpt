@@ -98,7 +98,8 @@ def reply(
 
 def postMessage(channel, prompt):
     response = openai.Completion.create(
-        model="curie:ft-personal-2023-07-04-05-59-02",
+        # model="curie:ft-personal-2023-07-04-05-59-02",
+        model="curie:ft-personal:phil-gpt-2023-06-15-04-19-27",
         prompt=prompt,
         max_tokens=100,
         temperature=0.85,
