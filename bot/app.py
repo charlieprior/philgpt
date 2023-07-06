@@ -96,6 +96,18 @@ def reply(
     postMessage(channel, prompt)
 
 
+def postImage(channel, prompt):
+    response = openai.Image.create(
+        prompt=prompt,
+        n=1,
+        size="1024x1024"
+    )
+    image_url = response['data'][0]['url']
+    attachments = [{"title": "Cat", "image_url": image_url}]
+    client.chat_postMessage(channel=channel, text=prompt,
+                            attachments=attachments)
+
+
 def postMessage(channel, prompt):
     response = openai.Completion.create(
         # model="curie:ft-personal-2023-07-04-05-59-02",
@@ -163,9 +175,22 @@ def randomMessages():
         waitTime = random.randint(24 * 60 * 60, 3 * 24 * 60 * 60)  # Seconds
 
 
+def randomPictures():
+    prompt = r"Describe a cool scene Phil Barbeau\nPhil Barbeau:"
+    waitTime = 120  # seconds
+    while True:
+        postTime = datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(seconds=waitTime, hours=-4)
+        logging.info(f"Image will be posted at %s %s UTC-4" % (postTime.date(), postTime.time()))
+        time.sleep(waitTime)
+        postImage("random", prompt)
+        waitTime = random.randint(24 * 60 * 60, 3 * 24 * 60 * 60)  # Seconds
+
+
 if __name__ == '__main__':
     t = threading.Thread(target=randomMessages)
     t.start()
+    t2 = threading.Thread(target=randomPictures)
+    t2.start()
     port = int(os.environ.get("PORT", 3000))
     with Configurator() as config:
         config.add_route('listener', '/')
