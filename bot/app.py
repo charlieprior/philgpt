@@ -118,13 +118,24 @@ def postImage(channel, prompt, showText=True):
                     "18886": -0.1,
                     "62": -1.1}  # Penalize emoji keywords and semicolons
     )
-    output = response["choices"][0]["text"].strip()
+    philGPToutput = response["choices"][0]["text"].strip()
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "Describe an image based on the following prompt in 100 words or less."},
+            {"role": "user", "content": philGPToutput}
+        ]
+    )
+    imagePrompt = response["choices"][0]["message"]["content"].strip()
+    logging.info(f"Image prompt: %s" % imagePrompt)
+
     response = openai.Image.create(
-        prompt=output,
+        prompt=imagePrompt,
         n=1,
         size="1024x1024"
     )
-    text = output if showText else ''
+    text = philGPToutput if showText else ''
     image_url = response['data'][0]['url']
     attachments = [{"title": "A drawing by PhilGPT", "image_url": image_url}]
     client.chat_postMessage(channel=channel, text=text,
