@@ -68,6 +68,7 @@ def reply(
 ) -> str:
     channel = body["event"]["channel"]
     ts = body["event"]["ts"]
+    text = body["event"]["text"]
 
     # Get history
     # Can't limit because then we only get the oldest messages
@@ -92,11 +93,13 @@ def reply(
 
     prompt += "Phil Barbeau:"
 
-    # Submit to OpenAI
+    # Post a picture if we're asked for one!
+    if ('picture' in text.lower()) or ('image' in text.lower()):
+        postImage(channel, prompt, showText=False)
     postMessage(channel, prompt)
 
 
-def postImage(channel, prompt):
+def postImage(channel, prompt, showText=True):
     response = openai.Completion.create(
         # model="curie:ft-personal-2023-07-04-05-59-02",
         model="curie:ft-personal:phil-gpt-2023-06-15-04-19-27",
@@ -121,9 +124,10 @@ def postImage(channel, prompt):
         n=1,
         size="1024x1024"
     )
+    text = output if showText else ''
     image_url = response['data'][0]['url']
     attachments = [{"title": "A drawing by PhilGPT", "image_url": image_url}]
-    client.chat_postMessage(channel=channel, text=output,
+    client.chat_postMessage(channel=channel, text=text,
                             attachments=attachments)
 
 
